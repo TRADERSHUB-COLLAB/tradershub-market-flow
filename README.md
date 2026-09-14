@@ -34,10 +34,19 @@ app/
   providers/
     base.py             Provider protocol
     mock.py             Deterministic mock data provider (default)
+validation/
+  harness.py          SQLite-backed recorder for daily pulses
+  report.py           Rolling-window summary (regimes, scores, flips, drivers)
+  replay.py           Re-score stored snapshots and diff vs recorded pulses
+  cli.py              `python -m validation.cli ...` entrypoint
 tests/
   test_health.py
   test_pulse.py
   test_scoring.py
+  test_validation_harness.py
+  test_validation_report.py
+  test_validation_replay.py
+  test_validation_cli.py
 requirements.txt
 pyproject.toml
 .env.example
@@ -62,9 +71,40 @@ pip install -r requirements.txt
 pytest -q
 ```
 
+## Private 30-trading-day validation harness
+
+Before Market Pulse touches the live homepage it runs privately for 30
+trading days. The harness lives under `validation/` and is driven by a
+single CLI:
+
+```bash
+# Nightly (cron or manual): record today's pulses for all three sessions.
+python -m validation.cli run-day
+
+# Same, but for a specific historic date and only the US session.
+python -m validation.cli run-day --date 2026-09-14 --sessions us
+
+# Rolling summary over the last N pulses (default 90 = 30 trading days x 3 sessions).
+python -m validation.cli report --limit 90
+
+# Re-score every stored snapshot with the current engine and print any diffs.
+# Exits non-zero if any pulse changed, so it plugs straight into CI.
+python -m validation.cli replay --limit 90
+
+# Peek at recent rows.
+python -m validation.cli list --limit 30
+```
+
+Data is stored in `validation/pulses.sqlite` by default (override with
+`--db`). The `(provider, session, trade_date)` triple is unique, so
+nightly re-runs are idempotent. The report covers regime distribution,
+score min/mean/max/stdev, confirmation pass rate, day-over-day regime
+flips per session, and the top recurring drivers. The replay is what
+catches silent scoring changes between engine revisions.
+
 ## Status
 
-This is the initial starter scaffold committed as part of the Market Flow
-upgrade. The mock provider is deliberately deterministic so that the private
-30-day validation harness produces reproducible pulses while real data
-providers are being wired in.
+This is the initial starter scaffold plus the private validation harness.
+The mock provider is deliberately deterministic so that the 30-day
+validation window produces reproducible pulses while real data providers
+are being wired in.
