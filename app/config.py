@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     provider: str = "mock"
     log_level: str = "info"
 
+    # TwelveData provider (used when provider="twelvedata").
+    twelvedata_api_key: str | None = None
+
     model_config = SettingsConfigDict(
         env_prefix="MARKET_FLOW_",
         env_file=".env",

@@ -34,6 +34,7 @@ app/
   providers/
     base.py             Provider protocol
     mock.py             Deterministic mock data provider (default)
+    twelvedata.py       TwelveData /quote provider (real market data)
 validation/
   harness.py          SQLite-backed recorder for daily pulses
   report.py           Rolling-window summary (regimes, scores, flips, drivers)
@@ -47,6 +48,8 @@ tests/
   test_validation_report.py
   test_validation_replay.py
   test_validation_cli.py
+  test_twelvedata_provider.py
+  test_provider_registry.py
 requirements.txt
 pyproject.toml
 .env.example
@@ -70,6 +73,29 @@ Then open `http://localhost:8000/docs` for the interactive schema.
 pip install -r requirements.txt
 pytest -q
 ```
+
+## Providers
+
+Two providers ship with the service:
+
+- **`mock`** (default) — deterministic, seeded from `(session, trade_date)`.
+  Used by tests, CI, and any local run without credentials.
+- **`twelvedata`** — real market data via TwelveData's `/quote` endpoint,
+  the same source the existing TradersHub scanner already trusts.
+
+Switch by setting environment variables:
+
+```bash
+export MARKET_FLOW_PROVIDER=twelvedata
+export MARKET_FLOW_TWELVEDATA_API_KEY=your_key_here
+```
+
+The TwelveData provider batches the full instrument universe into a single
+`/quote` call and normalises each response to the same `AssetQuote` shape
+the scoring engine expects, so switching providers is a config change, not
+a code change. Per-symbol failures (e.g. one instrument temporarily
+unavailable on your plan) are skipped so a partial outage does not block a
+pulse; a total-response error is surfaced.
 
 ## Private 30-trading-day validation harness
 
