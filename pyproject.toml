@@ -1,0 +1,9 @@
+[project]
+name = "tradershub-market-flow"
+version = "0.1.0"
+description = "TradersHub Market Flow service"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
