@@ -1,0 +1,26 @@
+name = "tradershub-market-flow"
+main = "src/index.ts"
+compatibility_date = "2024-09-25"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment defaults. Override with `wrangler secret put` for secrets
+# and via the KV binding created below (id filled in on first deploy).
+[vars]
+PROVIDER = "twelvedata"     # "mock" | "twelvedata"
+CORS_ORIGIN = "https://tradershub.dev"
+
+# KV namespace: caches today's pulse so hot reads never hit TwelveData.
+# Create with: `wrangler kv:namespace create MARKET_FLOW_CACHE`
+# Then paste the returned id below.
+[[kv_namespaces]]
+binding = "CACHE"
+id = "PLACEHOLDER_KV_ID"
+
+# Cron: record the daily pulse at 05:00 UTC = 07:00 SAST every trading day
+# (Mon–Fri). Weekends skipped — no harm rerunning, but no reason to spend
+# TwelveData credits on a closed tape.
+[triggers]
+crons = ["0 5 * * 1-5"]
+
+[observability]
+enabled = true

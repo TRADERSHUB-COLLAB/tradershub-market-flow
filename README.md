@@ -18,6 +18,20 @@ Pulse product line.
 The public TradersHub API and the TradingView indicator remain separate,
 untouched products. Market Flow is built beside them, not on top of them.
 
+## Two implementations, one contract
+
+The repo contains two implementations of the same Market Flow engine:
+
+- **`app/` + `validation/` (Python / FastAPI)** — the reference
+  implementation and offline validation harness. Deterministic scoring,
+  30-trading-day replay diff, pytest suite. Not deployed in production.
+- **`worker/` (Cloudflare Worker / TypeScript)** — the production runtime
+  deployed at `market.tradershub.dev`. Same scoring behaviour, ported
+  line-for-line, with a KV cache and a daily cron trigger.
+
+Behaviour changes should land in both. See `worker/README.md` for the
+deploy runbook.
+
 ## Layout
 
 ```

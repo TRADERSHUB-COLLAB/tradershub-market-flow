@@ -1,0 +1,20 @@
+{
+  "name": "tradershub-market-flow-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Worker: TradersHub Market Flow — daily market read served at market.tradershub.dev",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.5.0",
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.0",
+    "wrangler": "^3.78.0"
+  }
+}
